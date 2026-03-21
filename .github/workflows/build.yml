@@ -92,6 +92,7 @@ jobs:
 
             docker compose pull
 
+            # test
             docker compose up -d
 
             # Clear old iamges test
