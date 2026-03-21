@@ -13,14 +13,16 @@ services:
     labels:
       # Enable Traefik and point out the Docker network
       - "traefik.enable=true"
-      # 1. Point out the domen
-      - "traefik.http.routers.naska-api.rule=Host(`naska-api.alexey-web-dev.ru`)"
-      # 2. Get the Traffic by http
-      # - "traefik.http.routers.naska-api.entrypoints=web"
-      - "traefik.http.routers.naska-api.entrypoints=web,websecure" # Изменили web на websecure
-      - "traefik.http.routers.naska-api.tls.certresolver=myresolver" # Сказали выпустить SSL!
-      # 3. Point out to Traefik the port of our app
-      - "traefik.http.services.naska-api.loadbalancer.server.port=5000"
+      - "traefik.docker.network=web"
+      # Set up the routing conf
+      - "traefik.http.routers.naska-api.rule=Host(`naska.alexey-web-dev.ru`)"
+      - "traefik.http.routers.naska-api.entrypoints=websecure"
+      - "traefik.http.routers.naska-api.tls.certresolver=myresolver"
+      - "traefik.http.routers.naska-api.tls=true"
+      # Set up the service conf
+      - "traefik.http.routers.naska-api.service=naska-service"
+      - "traefik.http.services.naska-service.loadbalancer.server.port=5000"
+      - "traefik.http.services.naska-service.loadbalancer.passhostheader=true"
 
 networks:
   web:
