@@ -1,0 +1,57 @@
+---
+- name: Ensure app directory exists
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Copy application files
+  copy:
+    src: "{{ playbook_dir }}/../{{ item }}"
+    dest: "{{ app_dir }}/{{ item }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  loop:
+    - app
+    - Dockerfile
+    - docker-compose.yml
+
+- name: Copy dockerignore
+  copy:
+    src: "{{ playbook_dir }}/../.dockerignore"
+    dest: "{{ app_dir }}/.dockerignore"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Tear down existing services
+  command: docker compose down
+  args:
+    chdir: "{{ app_dir }}"
+  ignore_errors: yes
+
+- name: Build and start Docker Compose services
+  command: docker compose up -d --build
+  args:
+    chdir: "{{ app_dir }}"
+  register: compose_output
+
+- name: Wait for application to become ready
+  pause:
+    seconds: 10
+
+- name: Check health endpoint
+  uri:
+    url: "http://localhost:{{ app_port }}/health"
+    method: GET
+    return_content: yes
+    status_code: 200
+  register: health_check
+  until: health_check.status == 200
+  retries: 5
+  delay: 5
+
+- name: Print health check result
+  debug:
+    msg: "Application is healthy! Response: {{ health_check.json }}"

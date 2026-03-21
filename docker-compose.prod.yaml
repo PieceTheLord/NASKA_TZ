@@ -1,0 +1,17 @@
+services:
+  app:
+    image: ghcr.io/piecethelord/simple-app:latest
+    container_name: simple-app-api
+    restart: always
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.greenapi.rule=Host(`greenapi.alexey-web-dev.ru`)"
+      - "traefik.http.routers.greenapi.entrypoints=websecure"
+      - "traefik.http.routers.greenapi.tls.certresolver=myresolver"
+      - "traefik.http.services.greenapi.loadbalancer.server.port=5000"
+
+networks:
+  web:
+    external: true

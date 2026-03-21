@@ -1,0 +1,32 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: simple-app:latest
+    container_name: simple-app-api
+    # ports:
+    #   - "5000:5000"
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      # 1. Point out the domen
+      - "traefik.http.routers.newapi.rule=Host(`naska.alexey-web-dev.ru`)"
+      # 2. Get the traffic
+      - "traefik.http.routers.newapi.entrypoints=websecure" # Изменили web на websecure
+      - "traefik.http.routers.newapi.tls.certresolver=myresolver" # Сказали выпустить SSL!
+      # 3. Point out the inner app port
+      - "traefik.http.services.newapi.loadbalancer.server.port=5000"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    # Бонус: Синхронизация кода для локальной разработки (без перезапуска сборки)
+    # volumes:
+    #   - ./app:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

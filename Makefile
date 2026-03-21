@@ -1,53 +1,66 @@
 .PHONY: help install lint test run server-info docker-build docker-run compose-up compose-down compose-logs ansible-check ansible-dry ansible-run
 
-# Переменные
 APP_DIR = app
 SCRIPTS_DIR = scripts
 ANSIBLE_DIR = ansible
 
-help: ## Показать все доступные команды
+help:
 	@echo "Доступные команды:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo "  help            Показать все доступные команды"
+	@echo "  install         Установить зависимости Python локально"
+	@echo "  lint            Проверить качество кода (ruff для Python, shellcheck для Bash)"
+	@echo "  test            Запустить тесты"
+	@echo "  run             Запустить приложение локально (FastAPI)"
+	@echo "  server-info     Запустить Bash-скрипт диагностики сервера"
+	@echo "  docker-build    Собрать Docker образ"
+	@echo "  docker-run      Запустить контейнер"
+	@echo "  compose-up      Запустить Docker Compose (в фоне)"
+	@echo "  compose-down    Остановить Docker Compose"
+	@echo "  compose-logs    Просмотреть логи Docker Compose"
+	@echo "  ansible-check   Проверить синтаксис Ansible playbook"
+	@echo "  ansible-dry     Запустить Ansible playbook в режиме dry-run"
+	@echo "  ansible-run     Запустить Ansible playbook на серверах"
 
-install: ## Установить зависимости Python локально
+install:
 	pip install -r $(APP_DIR)/requirements.txt
-	pip install ruff  # Устанавливаем линтер
+	pip install ruff
 
-lint: ## Проверить качество кода (ruff для Python, shellcheck для Bash)
-	@echo "--- Запуск ruff для Python ---"
+lint:
 	ruff check $(APP_DIR)/
-	@echo "--- Запуск shellcheck для Bash ---"
-	shellcheck $(SCRIPTS_DIR)/*.sh
+	bash -c "shellcheck $(SCRIPTS_DIR)/*.sh"
 
-test: ## Запустить тесты
-	PYTHONPATH=. pytest $(APP_DIR)/tests/ -v
+test:
+	python -m pytest $(APP_DIR)/tests/ -v
 
-run: ## Запустить приложение локально (FastAPI)
+run:
 	uvicorn main:app --app-dir $(APP_DIR) --host 0.0.0.0 --port 5000 --reload
 
-server-info: ## Запустить Bash-скрипт диагностики сервера
+server-info:
 	bash $(SCRIPTS_DIR)/server-info.sh http://localhost:5000/health
 
-docker-build: ## Собрать Docker образ
+docker-build:
 	docker build -t simple-app:latest .
 
-docker-run: ## Запустить контейнер
+docker-run:
 	docker run -p 5000:5000 --rm --name simple-app-api simple-app:latest
 
-compose-up: ## Запустить Docker Compose (в фоне)
-	docker-compose up -d
+compose-up:
+	docker compose up -d
 
-compose-down: ## Остановить Docker Compose
-	docker-compose down
+compose-down:
+	docker compose down
 
-compose-logs: ## Просмотреть логи Docker Compose
-	docker-compose logs -f app
+docker-ps:
+	docker ps
 
-ansible-check: ## Проверить синтаксис Ansible playbook
+compose-logs:
+	docker compose logs -f app
+
+ansible-check:
 	ansible-playbook --syntax-check -i $(ANSIBLE_DIR)/inventory.ini $(ANSIBLE_DIR)/playbook.yml
 
-ansible-dry: ## Запустить Ansible playbook в режиме dry-run (проверка изменений)
+ansible-dry:
 	ansible-playbook -i $(ANSIBLE_DIR)/inventory.ini $(ANSIBLE_DIR)/playbook.yml --check
 
-ansible-run: ## Запустить Ansible playbook на серверах
+ansible-run:
 	ansible-playbook -i $(ANSIBLE_DIR)/inventory.ini $(ANSIBLE_DIR)/playbook.yml

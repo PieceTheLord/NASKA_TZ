@@ -1,0 +1,92 @@
+name: CI/CD Pipeline
+
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  packages: write
+
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: |
+          pip install ruff pytest https fastapi uvicorn pydantic
+          pip install -r app/requirements.txt
+
+      - name: Run Linting (Ruff)
+        run: ruff check app/
+
+      - name: Run Tests (Pytest)
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest app/tests/ -v
+
+  build-and-push:
+    needs: test-and-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/naskatest-app:latest
+            ghcr.io/${{ github.repository_owner }}/naskatest-app:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+
+      - name: Copy docker-compose via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.prod.yaml"
+          target: "/opt/naskatest-app"
+
+
+      - name:  Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/naskatest-app
+
+            echo ${{ secrets.GITHUB_TOKEN }} | docker loginghcr.io -u ${{ github.actor }} --password-stdin
+
+            docker compose pull
+
+            docker compose up -d
+
+            # Clear old iamges
+            docker image prune -f
