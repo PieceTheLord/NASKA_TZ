@@ -59,8 +59,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/naskatest-app:latest
-            ghcr.io/${{ github.repository_owner }}/naskatest-app:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LC }}/naskatest-app:latest
+            ghcr.io/${{ env.OWNER_LC }}/naskatest-app:${{ github.sha }}
 
   deploy:
     needs: build-and-push
