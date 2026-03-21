@@ -3,6 +3,9 @@ services:
     image: ghcr.io/piecethelord/naskatest-app:latest
     container_name: naskatest-app-api
     restart: always
+    volumes:
+      - /etc/letsencrypt/live/alexey-web-dev.ru/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+      - /etc/letsencrypt/live/alexey-web-dev.ru/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
     networks:
       - web
     labels:
