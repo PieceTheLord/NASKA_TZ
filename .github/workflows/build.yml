@@ -88,5 +88,5 @@ jobs:
 
             docker compose up -d
 
-            # Clear old iamges
+            # Clear old iamges test
             docker image prune -f
