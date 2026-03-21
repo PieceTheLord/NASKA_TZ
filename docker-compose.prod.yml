@@ -20,7 +20,7 @@ services:
       - "traefik.http.routers.naska-api.entrypoints=web,websecure" # Изменили web на websecure
       - "traefik.http.routers.naska-api.tls.certresolver=myresolver" # Сказали выпустить SSL!
       # 3. Point out to Traefik the port of our app
-      - "traefik.http.services.naska-api.loadbalancer.server.port=80"
+      - "traefik.http.services.naska-api.loadbalancer.server.port=5000"
 
 networks:
   web:
