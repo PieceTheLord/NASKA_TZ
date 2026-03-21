@@ -13,13 +13,16 @@ services:
     labels:
       # Enable Traefik and point out the Docker network
       - "traefik.enable=true"
+      # - "traefik.docker.network=web,websecure"
       # Set up the routing conf
       - "traefik.http.routers.naska-api.rule=Host(`naska.alexey-web-dev.ru`)"
       - "traefik.http.routers.naska-api.entrypoints=websecure,web"
       - "traefik.http.routers.naska-api.tls.certresolver=myresolver"
       - "traefik.http.services.naska-api.loadbalancer.server.port=5000"
       # Set up the service conf
+      - "traefik.http.routers.naska-api.service=naska-service"
       - "traefik.http.services.naska-service.loadbalancer.server.port=5000"
+      - "traefik.http.services.naska-service.loadbalancer.passhostheader=true"
 
 networks:
   web:
