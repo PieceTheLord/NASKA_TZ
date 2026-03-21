@@ -26,7 +26,7 @@ EXPOSE 5000
 
 # Добавляем HEALTHCHECK
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://0.0.0.0:5000/health || exit 1
+    CMD curl -f http://127.0.0.1:5000/health || exit 1
 
 # Запуск через gunicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "main:app", "--host", "127.0.0.1", "--port", "5000"]
