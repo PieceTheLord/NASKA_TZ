@@ -1,7 +1,7 @@
 services:
   app:
-    image: ghcr.io/piecethelord/simple-app:latest
-    container_name: simple-app-api
+    image: ghcr.io/piecethelord/naskatest-app:latest
+    container_name: naskatest-app-api
     restart: always
     networks:
       - web

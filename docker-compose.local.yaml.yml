@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: simple-app:latest
-    container_name: simple-app-api
+    image: ghcr.io/piecethelord/naskatest-app:latest
+    container_name: naskatest-app-api
     # ports:
     #   - "5000:5000"
     networks:
