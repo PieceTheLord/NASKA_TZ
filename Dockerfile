@@ -29,4 +29,4 @@ EXPOSE 5000
 #     CMD curl -f http://127.0.0.1:5000/health || exit 1
 
 # Запуск через gunicorn
-CMD ["uvicorn", "main:app", "--host", "localhost", "--port", "5000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
