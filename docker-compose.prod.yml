@@ -7,10 +7,10 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.greenapi.rule=Host(`greenapi.alexey-web-dev.ru`)"
-      - "traefik.http.routers.greenapi.entrypoints=websecure"
-      - "traefik.http.routers.greenapi.tls.certresolver=myresolver"
-      - "traefik.http.services.greenapi.loadbalancer.server.port=5000"
+      - "traefik.http.routers.naska.rule=Host(`naska.alexey-web-dev.ru`)"
+      - "traefik.http.routers.naska.entrypoints=websecure"
+      - "traefik.http.routers.naska.tls.certresolver=myresolver"
+      - "traefik.http.services.naska.loadbalancer.server.port=5000"
 
 networks:
   web:
