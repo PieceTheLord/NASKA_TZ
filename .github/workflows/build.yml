@@ -93,7 +93,7 @@ jobs:
 
             docker compose pull
 
-            docker compose up -d
+            docker compose -f docker-compose.prod.yml up -d
 
             # Clear old iamges test
             docker image prune -f
